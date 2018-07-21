@@ -12,6 +12,7 @@ stack *g_stack;
 Token *tstream;
 stack *exec_stack;
 int g_pc = 0;
+int g_ip = 0;
 int g_sp = 0;
 int e_sp = 0;
 int r_sp = 0;
@@ -34,7 +35,7 @@ void initial(FILE *fp){
 }
 void parsing(void){
   Token *tkn;
-  Token cur;
+  Token *cur;
   int i = 0;
   int k = 0;
   int top = 0;
@@ -43,39 +44,49 @@ void parsing(void){
     tkn = getNToken();
     switch (tkn->kind) {
       case OP_INT:
-      top++;
-      tstream[top].u.num = tkn->u.num;
+      //tstream[top].u.num = tkn->u.num;
+      exec_push(tkn);
+      //exec_stack[++g_sp] = tkn->u.num;
       break;
       case OP_ADD:
-      rval = tstream[top].u.num;
-      top--;
-      lval = tstream[top].u.num;
-      tstream[top].u.num = lval + rval;
+      cur = exec_pop();
+      rval = cur->u.num;
+      cur = exec_pop();
+      lval = cur->u.num;
+      cur->u.num = lval + rval;
+      exec_push(cur);
       break;
       case OP_SUB:
-      rval = tstream[top].u.num;
-      top--;
-      lval = tstream[top].u.num;
-      tstream[top].u.num = lval - rval;
+      cur = exec_pop();
+      rval = cur->u.num;
+      cur = exec_pop();
+      lval = cur->u.num;
+      cur->u.num = lval - rval;
+      exec_push(cur);
       break;
       case OP_MUL:
-      rval = tstream[top].u.num;
-      top--;
-      lval = tstream[top].u.num;
-      tstream[top].u.num = lval * rval;
+      cur = exec_pop();
+      rval = cur->u.num;
+      cur = exec_pop();
+      lval = cur->u.num;
+      cur->u.num = lval * rval;
+      exec_push(cur);
       break;
       case OP_DIV:
-      rval = tstream[top].u.num;
-      top--;
-      lval = tstream[top].u.num;
-      tstream[top].u.num = lval / rval;
+      cur = exec_pop();
+      rval = cur->u.num;
+      cur = exec_pop();
+      lval = cur->u.num;
+      cur->u.num = lval / rval;
+      exec_push(cur);
       break;
       case OP_PRINT:
-      printf("printer:%d\n",tstream[top].u.num);
+      cur = exec_pop();
+      printf("printer:%d\n",cur->u.num);
     }
       st_push(tkn);
       if(tkn->kind == OP_END_OF_FILE){
-      printf("success!!\n");
+      printf("Program is correct end.\n");
       break;
     }
   }
@@ -306,28 +317,19 @@ int parsExpr(void){
   return acc;
 }
 void exec_push(Token *tkn){
-  e_sp++;
-  exec_stack[e_sp].token = *tkn;
+  g_sp++;
+  g_stack[g_sp].token = *tkn;
 }
 Token *exec_pop(void){
   Token *ret;
   ret = malloc(sizeof(Token));
-  e_sp--;
+  g_sp--;
   //stack *stk;
   //printf("p:%d\n", g_sp);
-  if(e_sp <= 0){
+  if(g_sp <= 0){
     printf("STACK is EMPTY!\n");
     exit(1);
   }
-  if(exec_stack[e_sp].token.kind == OP_INT){
-    ret->u.num = exec_stack[e_sp].token.u.num;
-  }
-  else
-  {
-    //strcpy(ret->name, g_stack[g_sp].token.name);
-  }
-  ret->kind = exec_stack[e_sp].token.kind;
-  //g_sp--;
+  ret = &g_stack[g_sp].token;
   return ret;
-
 }

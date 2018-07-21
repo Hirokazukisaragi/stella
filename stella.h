@@ -20,6 +20,8 @@ typedef enum{
   OP_LT,
   END_OF_OP,
   OP_BEGIN,
+  OP_PUSH,
+  OP_POP,
   OP_PRINT,
   OP_RET,
   OP_IF,

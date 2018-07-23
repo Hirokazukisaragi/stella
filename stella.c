@@ -55,6 +55,7 @@ void parsing(void){
   int k = 0;
   int top = 0;
   int lval,rval;
+  int skipline = 0;
   while(1){
     tkn = getNToken();
     if(tkn->kind == OP_THEN){
@@ -123,7 +124,6 @@ void parsing(void){
       }else{
         iflag = FALSE;
       }
-      //exec_push(cur);
       break;
 
       case OP_IF:
@@ -136,7 +136,14 @@ void parsing(void){
         }
         tkn->kind = OP_ELSE;
         break;
-        //exec_push(cur);
+      }
+      break;
+
+      case OP_SKIP:
+      cur = exec_pop();
+      skipline = cur->u.num;
+      for(k = 0;k < skipline;k++){
+        getNToken();
       }
       break;
 
@@ -160,7 +167,6 @@ void parsing(void){
       cur = exec_pop();
       printf("printer:%d\n",cur->u.num);
     }
-    //exec_push(tkn);
       if(tkn->kind == OP_END_OF_FILE){
       printf("Program is correct end.\n");
       break;
@@ -316,7 +322,6 @@ Token *getNToken(){
     g_pc++;
     return ret;
   }else{
-    //ret->kind = OP_NOTKW;
     if(ret->kind == OP_INT){
       ret->u.num = rnum;
     }else{
@@ -348,22 +353,6 @@ void skipWS(void){
     g_pc++;
   }
 }
-int parsInt(void){
-  int acc;
-  acc = g_stack[g_sp].token.u.num;
-  //st_pop();
-  return acc;
-}
-int parsTerm(void){
-  int acc;
-  acc = parsInt();
-  return acc;
-}
-int parsExpr(void){
-  int acc;
-  acc = parsTerm();
-  return acc;
-}
 void exec_push(Token *tkn){
   g_sp++;
   g_stack[g_sp].token = *tkn;
@@ -371,9 +360,6 @@ void exec_push(Token *tkn){
 Token *exec_pop(void){
   Token *ret;
   ret = malloc(sizeof(Token));
-  //g_sp--;
-  //stack *stk;
-  //printf("p:%d\n", g_sp);
   if(g_sp <= 0){
     printf("STACK is EMPTY!\n");
     exit(1);

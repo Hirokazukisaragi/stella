@@ -26,6 +26,7 @@ typedef enum{
   OP_THEN,
   OP_TRUE,
   OP_ELSE,
+  OP_SKIP,
   OP_PUSH,
   OP_POP,
   OP_PRINT,
@@ -55,6 +56,7 @@ KWinfo g_keywordtbl[] = {
   {"then",OP_THEN},
   {"return",OP_RET},
   {"fn",OP_FUNCD},
+  {"skip",OP_SKIP},
   {"print",OP_PRINT},
   {"END_OF_KW",OP_NOP},
 };

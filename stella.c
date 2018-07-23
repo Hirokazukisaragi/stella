@@ -140,10 +140,8 @@ void parsing(void){
       break;
 
       case OP_SKIP:
-      cur = exec_pop();
-      skipline = cur->u.num;
-      for(k = 0;k < skipline;k++){
-        getNToken();
+      while(cur->kind != OP_ENDSKIP){
+        cur = getNToken();
       }
       break;
 

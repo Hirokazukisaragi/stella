@@ -20,6 +20,8 @@ char st_srcode[MAX_STR_LEN];
 stack *g_stack;
 Token *tstream;
 stack *exec_stack;
+stack ifstack[10];
+int dummy = 0;
 int g_pc = 0;
 int g_ip = 0;
 int g_sp = 0;
@@ -41,6 +43,10 @@ void initial(FILE *fp){
   g_stack = malloc(sizeof(stack) * STACK_MAX);
   exec_stack = malloc(sizeof(stack) * STACK_MAX);
   tstream = malloc(sizeof(Token) * STACK_MAX);
+  Token *tkn;
+  tkn = malloc(sizeof(Token));
+  tkn->kind = OP_BEGIN;
+  exec_push(tkn);
 }
 void parsing(void){
   Token *tkn;
@@ -51,8 +57,12 @@ void parsing(void){
   int lval,rval;
   while(1){
     tkn = getNToken();
+    if(tkn->kind == OP_THEN){
+      tkn = getNToken();
+    }
     switch (tkn->kind) {
       case OP_INT:
+      //printf("push:%d\n",tkn->u.num );
       //tstream[top].u.num = tkn->u.num;
       exec_push(tkn);
       //exec_stack[++g_sp] = tkn->u.num;
@@ -89,11 +99,68 @@ void parsing(void){
       cur->u.num = lval / rval;
       exec_push(cur);
       break;
+
+      case OP_LT:
+      cur = exec_pop();
+      rval = cur->u.num;
+      cur = exec_pop();
+      lval = cur->u.num;
+      if(lval < rval){
+        iflag = TRUE;
+      }else{
+        iflag = FALSE;
+      }
+      //exec_push(cur);
+      break;
+
+      case OP_GT:
+      cur = exec_pop();
+      rval = cur->u.num;
+      cur = exec_pop();
+      lval = cur->u.num;
+      if(lval > rval){
+        iflag = TRUE;
+      }else{
+        iflag = FALSE;
+      }
+      //exec_push(cur);
+      break;
+
+      case OP_IF:
+      if(iflag == FALSE){
+        while(1){
+          tkn = getNToken();
+          if(tkn->kind ==  OP_ELSE){
+            break;
+          }
+        }
+        tkn->kind = OP_ELSE;
+        break;
+        //exec_push(cur);
+      }
+      break;
+
+      case OP_ELSE:
+      if(iflag == TRUE){
+        while(tkn->kind != OP_THEN){
+          tkn = getNToken();
+          if(tkn->kind == OP_THEN){
+            break;
+          }
+        }
+      }else{
+        break;
+      }
+      break;
+
+      case OP_THEN:
+      iflag = FALSE;
+      break;
       case OP_PRINT:
       cur = exec_pop();
       printf("printer:%d\n",cur->u.num);
     }
-      st_push(tkn);
+    //exec_push(tkn);
       if(tkn->kind == OP_END_OF_FILE){
       printf("Program is correct end.\n");
       break;
@@ -275,35 +342,7 @@ char getNchar(void){
   g_pc--;
   return ch;
 }
-void st_push(Token *tkn){
-  g_sp++;
-  g_stack[g_sp].token = *tkn;
-}
-Token *st_pop(void){
-  Token *ret;
-  ret = malloc(sizeof(Token));
-  g_sp--;
-  //stack *stk;
-  //printf("p:%d\n", g_sp);
-  if(g_sp <= 0){
-    printf("STACK is EMPTY!\n");
-    exit(1);
-  }
-  if(g_stack[g_sp].token.kind == OP_INT){
-    ret->u.num = g_stack[g_sp].token.u.num;
-  }
-  else
-  {
-    //strcpy(ret->name, g_stack[g_sp].token.name);
-  }
-  ret->kind = g_stack[g_sp].token.kind;
-  //g_sp--;
-  return ret;
-}
-Token st_peek(void){
-  //return g_stack->token;
-  return g_stack[g_sp].token;
-}
+
 void skipWS(void){
   while(st_srcode[g_pc] == ' ' || st_srcode[g_pc] == '\t' || st_srcode[g_pc] == '\n'){
     g_pc++;
@@ -332,7 +371,7 @@ void exec_push(Token *tkn){
 Token *exec_pop(void){
   Token *ret;
   ret = malloc(sizeof(Token));
-  g_sp--;
+  //g_sp--;
   //stack *stk;
   //printf("p:%d\n", g_sp);
   if(g_sp <= 0){
@@ -340,5 +379,6 @@ Token *exec_pop(void){
     exit(1);
   }
   ret = &g_stack[g_sp].token;
+  g_sp--;
   return ret;
 }

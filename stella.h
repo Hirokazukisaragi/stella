@@ -7,6 +7,9 @@ typedef enum{
   FALSE = 0,
   TRUE,
 }BOOL;
+BOOL bflag;
+BOOL iflag;
+BOOL stateflag;
 typedef enum{
   OP_ADD=1,
   OP_INT,
@@ -20,12 +23,17 @@ typedef enum{
   OP_LT,
   END_OF_OP,
   OP_BEGIN,
+  OP_THEN,
+  OP_TRUE,
+  OP_ELSE,
   OP_PUSH,
   OP_POP,
   OP_PRINT,
   OP_RET,
   OP_IF,
   OP_FUNCD,
+  OP_TURE,
+  OP_FALSE,
   OP_END_OF_FILE,
   OP_NOTKW,
   OP_NOP,
@@ -43,6 +51,8 @@ typedef struct KWinfo{
 }KWinfo;
 KWinfo g_keywordtbl[] = {
   {"if",OP_IF},
+  {"else",OP_ELSE},
+  {"then",OP_THEN},
   {"return",OP_RET},
   {"fn",OP_FUNCD},
   {"print",OP_PRINT},
